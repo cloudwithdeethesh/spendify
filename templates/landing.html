@@ -102,4 +102,57 @@
     </div>
 </section>
 
+<div class="video-modal" id="video-modal" aria-hidden="true">
+    <div class="video-modal-dialog" role="dialog" aria-modal="true" aria-label="How Spendly works">
+        <button class="video-modal-close" type="button" aria-label="Close video">&times;</button>
+        <div class="video-modal-frame">
+            <iframe
+                id="video-modal-iframe"
+                src=""
+                title="How Spendly works"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        var trigger = document.querySelector('.landing-hero-btn-secondary');
+        var modal = document.getElementById('video-modal');
+        var iframe = document.getElementById('video-modal-iframe');
+        var closeBtn = modal && modal.querySelector('.video-modal-close');
+        var videoUrl = 'https://www.youtube.com/embed/M7lc1UVf-VE?rel=0&autoplay=1';
+
+        if (!trigger || !modal || !iframe || !closeBtn) return;
+
+        function openModal(e) {
+            if (e) e.preventDefault();
+            iframe.src = videoUrl;
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('modal-open');
+        }
+
+        function closeModal() {
+            if (!modal.classList.contains('is-open')) return;
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('modal-open');
+            iframe.src = '';
+        }
+
+        trigger.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeModal();
+        });
+    })();
+</script>
 {% endblock %}
