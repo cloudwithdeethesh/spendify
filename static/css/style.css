@@ -28,6 +28,22 @@
     --radius-sm: 6px;
     --radius-md: 12px;
     --radius-lg: 20px;
+
+    /* Category palette — used by profile.css badges and breakdown bars */
+    --cat-food-bg:          var(--accent-2-light);
+    --cat-food-ink:         var(--accent-2);
+    --cat-bills-bg:         var(--danger-light);
+    --cat-bills-ink:        var(--danger);
+    --cat-other-bg:         var(--border-soft);
+    --cat-other-ink:        var(--ink-muted);
+    --cat-health-bg:        #e7f2ee;
+    --cat-health-ink:       #2f7a5b;
+    --cat-transport-bg:     #eaf1f8;
+    --cat-transport-ink:    #3d6a97;
+    --cat-shopping-bg:      #f4ecdf;
+    --cat-shopping-ink:     #a06a2b;
+    --cat-entertainment-bg: #f2ebf1;
+    --cat-entertainment-ink:#8b5e83;
 }
 
 /* ------------------------------------------------------------------ */
