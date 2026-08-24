@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from datetime import date
 
 from flask import Flask, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash
@@ -12,6 +13,7 @@ from database.queries import (
     get_summary_stats,
     get_user_by_id,
 )
+from filters import resolve_range
 
 app = Flask(__name__)
 
@@ -152,11 +154,23 @@ def profile():
         return redirect(url_for("login"))
     user["initials"] = _initials_from_name(user["name"])
 
-    stats = get_summary_stats(user_id)
+    resolved = resolve_range(
+        request.args.get("range"),
+        request.args.get("from"),
+        request.args.get("to"),
+        date.today(),
+    )
+    date_range = (
+        None
+        if resolved["active_range"] == "all"
+        else (resolved["from_date"], resolved["to_date"])
+    )
+
+    stats = get_summary_stats(user_id, date_range=date_range)
 
     transactions = [
         {**tx, "category_slug": CATEGORY_SLUGS.get(tx["category"], "other")}
-        for tx in get_recent_transactions(user_id, limit=None)
+        for tx in get_recent_transactions(user_id, limit=None, date_range=date_range)
     ]
 
     category_breakdown = [
@@ -166,7 +180,7 @@ def profile():
             "total": row["amount"],
             "percent": row["pct"],
         }
-        for row in get_category_breakdown(user_id)
+        for row in get_category_breakdown(user_id, date_range=date_range)
     ]
 
     return render_template(
@@ -175,6 +189,11 @@ def profile():
         stats=stats,
         transactions=transactions,
         category_breakdown=category_breakdown,
+        active_range=resolved["active_range"],
+        range_label=resolved["label"],
+        range_error=resolved["error"],
+        from_date=resolved["from_date"],
+        to_date=resolved["to_date"],
     )
 
 

@@ -13,6 +13,12 @@ CATEGORY_SLUGS = {
 }
 
 
+def _range_clause(date_range):
+    if not date_range or date_range[0] is None or date_range[1] is None:
+        return "", []
+    return " AND date BETWEEN ? AND ?", [date_range[0], date_range[1]]
+
+
 def get_user_by_id(user_id):
     conn = get_db()
     try:
@@ -38,19 +44,32 @@ def get_user_by_id(user_id):
         conn.close()
 
 
-def get_summary_stats(user_id):
+def get_summary_stats(user_id, date_range=None):
+    range_sql, range_params = _range_clause(date_range)
+    totals_sql = (
+        "SELECT COALESCE(SUM(amount), 0), COUNT(*) "
+        "FROM expenses "
+        "WHERE user_id = ?"
+        + range_sql
+    )
+    top_sql = (
+        "SELECT category "
+        "FROM expenses "
+        "WHERE user_id = ?"
+        + range_sql +
+        " GROUP BY category "
+        "ORDER BY SUM(amount) DESC "
+        "LIMIT 1"
+    )
     conn = get_db()
     try:
         total, count = conn.execute(
-            "SELECT COALESCE(SUM(amount), 0), COUNT(*) FROM expenses WHERE user_id = ?",
-            (user_id,),
+            totals_sql, [user_id, *range_params]
         ).fetchone()
         if count == 0:
             return {"total_spent": 0, "transaction_count": 0, "top_category": "—"}
         top_row = conn.execute(
-            "SELECT category FROM expenses WHERE user_id = ? "
-            "GROUP BY category ORDER BY SUM(amount) DESC LIMIT 1",
-            (user_id,),
+            top_sql, [user_id, *range_params]
         ).fetchone()
         top_category = top_row["category"] if top_row else "—"
         return {
@@ -62,18 +81,21 @@ def get_summary_stats(user_id):
         conn.close()
 
 
-def get_recent_transactions(user_id, limit=10):
+def get_recent_transactions(user_id, limit=10, date_range=None):
+    range_sql, range_params = _range_clause(date_range)
+    sql = (
+        "SELECT date, description, category, amount "
+        "FROM expenses "
+        "WHERE user_id = ?"
+        + range_sql +
+        " ORDER BY date DESC, id DESC"
+    )
+    params = [user_id, *range_params]
+    if limit is not None:
+        sql += " LIMIT ?"
+        params.append(limit)
     conn = get_db()
     try:
-        sql = (
-            "SELECT date, description, category, amount "
-            "FROM expenses WHERE user_id = ? "
-            "ORDER BY date DESC, id DESC"
-        )
-        params = [user_id]
-        if limit is not None:
-            sql += " LIMIT ?"
-            params.append(limit)
         rows = conn.execute(sql, params).fetchall()
         return [
             {
@@ -88,15 +110,19 @@ def get_recent_transactions(user_id, limit=10):
         conn.close()
 
 
-def get_category_breakdown(user_id):
+def get_category_breakdown(user_id, date_range=None):
+    range_sql, range_params = _range_clause(date_range)
+    sql = (
+        "SELECT category AS name, SUM(amount) AS amount "
+        "FROM expenses "
+        "WHERE user_id = ?"
+        + range_sql +
+        " GROUP BY category "
+        "ORDER BY amount DESC"
+    )
     conn = get_db()
     try:
-        rows = conn.execute(
-            "SELECT category AS name, SUM(amount) AS amount "
-            "FROM expenses WHERE user_id = ? "
-            "GROUP BY category ORDER BY amount DESC",
-            (user_id,),
-        ).fetchall()
+        rows = conn.execute(sql, [user_id, *range_params]).fetchall()
     finally:
         conn.close()
 
