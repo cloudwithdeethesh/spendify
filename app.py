@@ -1,11 +1,18 @@
 import os
 import sqlite3
-from datetime import date
+from datetime import date, datetime
 
 from flask import Flask, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash
 
-from database.db import create_user, get_db, get_user_by_email, init_db, seed_db
+from database.db import (
+    create_expense,
+    create_user,
+    get_db,
+    get_user_by_email,
+    init_db,
+    seed_db,
+)
 from database.queries import (
     CATEGORY_SLUGS,
     get_category_breakdown,
@@ -197,9 +204,75 @@ def profile():
     )
 
 
-@app.route("/expenses/add")
+@app.route("/analytics")
+def analytics():
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+    return render_template("analytics.html")
+
+
+@app.route("/expenses/add", methods=["GET", "POST"])
 def add_expense():
-    return "Add expense — coming in Step 7"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    today_iso = date.today().isoformat()
+    categories = list(CATEGORY_SLUGS.keys())
+
+    if request.method == "GET":
+        return render_template(
+            "add_expense.html",
+            today=today_iso,
+            categories=categories,
+            form={"date": today_iso},
+        )
+
+    amount_raw = request.form.get("amount", "").strip()
+    category = request.form.get("category", "").strip()
+    date_str = request.form.get("date", "").strip()
+    description = request.form.get("description", "").strip()
+
+    form = {
+        "amount": amount_raw,
+        "category": category,
+        "date": date_str,
+        "description": description,
+    }
+
+    def _render_error(message):
+        return render_template(
+            "add_expense.html",
+            today=today_iso,
+            categories=categories,
+            form=form,
+            error=message,
+        )
+
+    try:
+        amount = float(amount_raw)
+    except ValueError:
+        return _render_error("Enter a valid amount.")
+    if amount <= 0:
+        return _render_error("Amount must be greater than zero.")
+
+    if category not in CATEGORY_SLUGS:
+        return _render_error("Choose a valid category.")
+
+    try:
+        parsed_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        return _render_error("Enter a valid date.")
+    if parsed_date > date.today():
+        return _render_error("Date cannot be in the future.")
+
+    create_expense(
+        session["user_id"],
+        amount,
+        category,
+        parsed_date.isoformat(),
+        description or None,
+    )
+    return redirect(url_for("profile"))
 
 
 @app.route("/expenses/<int:id>/edit")

@@ -1,0 +1,189 @@
+/* ------------------------------------------------------------------ */
+/* Add-expense page                                                    */
+/* ------------------------------------------------------------------ */
+
+.add-expense-page {
+    padding: 3rem 1.5rem 5rem;
+    background: var(--paper);
+    min-height: calc(100vh - 200px);
+}
+
+.add-expense-inner {
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+.add-expense-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.add-expense-title {
+    font-family: var(--font-display);
+    font-size: 2.25rem;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+}
+
+.add-expense-subtitle {
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Error banner                                                        */
+/* ------------------------------------------------------------------ */
+
+.add-expense-error {
+    background: var(--danger-light);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* ------------------------------------------------------------------ */
+/* Form card                                                           */
+/* ------------------------------------------------------------------ */
+
+.add-expense-card {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+}
+
+.form-optional {
+    color: var(--ink-faint);
+    font-weight: 400;
+    font-size: 0.8rem;
+    margin-left: 0.25rem;
+}
+
+.form-row input[type="number"],
+.form-row input[type="text"],
+.form-row input[type="date"],
+.form-row select {
+    width: 100%;
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.form-row input:focus,
+.form-row select:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--paper-card);
+}
+
+.form-row select {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    padding-right: 2.5rem;
+    background-image: linear-gradient(45deg, transparent 50%, var(--ink-muted) 50%),
+                      linear-gradient(135deg, var(--ink-muted) 50%, transparent 50%);
+    background-position: calc(100% - 20px) center, calc(100% - 14px) center;
+    background-size: 6px 6px;
+    background-repeat: no-repeat;
+}
+
+/* ------------------------------------------------------------------ */
+/* Amount input with rupee prefix                                      */
+/* ------------------------------------------------------------------ */
+
+.amount-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.amount-prefix {
+    position: absolute;
+    left: 1rem;
+    color: var(--ink-muted);
+    font-weight: 500;
+    pointer-events: none;
+}
+
+.amount-input input {
+    padding-left: 2.25rem;
+}
+
+/* Hide native spinners so the rupee prefix stays balanced. */
+.amount-input input::-webkit-outer-spin-button,
+.amount-input input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.amount-input input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* ------------------------------------------------------------------ */
+/* Actions                                                             */
+/* ------------------------------------------------------------------ */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: var(--paper-card);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1.5rem;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    color: var(--ink-muted);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.btn-secondary:hover {
+    color: var(--ink);
+    background: var(--paper-warm);
+}
