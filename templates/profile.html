@@ -19,6 +19,42 @@
             </div>
         </header>
 
+        {% if range_error %}
+        <div class="filter-error" role="alert">{{ range_error }}</div>
+        {% endif %}
+
+        <section class="profile-card filter-bar" aria-label="Date range">
+            <nav class="filter-chips" aria-label="Preset ranges">
+                {% for key, label in [
+                    ('this_month',   'This month'),
+                    ('last_month',   'Last month'),
+                    ('last_7_days',  'Last 7 days'),
+                    ('last_30_days', 'Last 30 days'),
+                    ('all',          'All time')
+                ] %}
+                <a class="filter-chip {% if active_range == key %}is-active{% endif %}"
+                   href="{{ url_for('profile', range=key) }}">{{ label }}</a>
+                {% endfor %}
+                <a class="filter-chip {% if active_range == 'custom' %}is-active{% endif %}"
+                   href="#filter-custom">Custom</a>
+            </nav>
+            <form id="filter-custom" class="filter-custom"
+                  method="get" action="{{ url_for('profile') }}">
+                <input type="hidden" name="range" value="custom">
+                <label class="filter-field">
+                    <span>From</span>
+                    <input type="date" name="from"
+                           value="{% if active_range == 'custom' %}{{ from_date }}{% endif %}">
+                </label>
+                <label class="filter-field">
+                    <span>To</span>
+                    <input type="date" name="to"
+                           value="{% if active_range == 'custom' %}{{ to_date }}{% endif %}">
+                </label>
+                <button type="submit" class="filter-apply">Apply</button>
+            </form>
+        </section>
+
         <section class="stats-grid" aria-label="Spending summary">
             <div class="stat-card">
                 <span class="stat-label">Total spent</span>
@@ -33,6 +69,8 @@
                 <span class="stat-value">{{ stats.top_category }}</span>
             </div>
         </section>
+
+        <p class="filter-caption">Showing {{ range_label }}</p>
 
         <section class="profile-card">
             <div class="profile-card-header">
@@ -61,6 +99,10 @@
                             </td>
                             <td class="col-amount">₹{{ '{:,.2f}'.format(tx.amount) }}</td>
                         </tr>
+                        {% else %}
+                        <tr class="empty-row">
+                            <td colspan="4">No expenses in this range yet.</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -81,6 +123,8 @@
                     </div>
                     <span class="category-row-amount">₹{{ '{:,.2f}'.format(cat.total) }}</span>
                 </li>
+                {% else %}
+                <li class="empty-row">No expenses in this range yet.</li>
                 {% endfor %}
             </ul>
         </section>
